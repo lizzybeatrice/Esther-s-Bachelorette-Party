@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSVP Tracker — Esther's Bachelorette 🌸</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink: #f7c6d9;
+    --pink-deep: #e88bab;
+    --yellow: #f7e2a4;
+    --yellow-deep: #eec868;
+    --cream: #fffaf3;
+    --ink: #6b4a52;
+    --green: #6fbf8b;
+    --red: #d97a86;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; min-height:100vh;
+    font-family:'Quicksand', sans-serif;
+    background: linear-gradient(160deg, #fff6ef 0%, #ffeef5 45%, #fff9ec 100%);
+    color: var(--ink);
+    padding: 28px 16px 60px;
+  }
+  .wrap{ max-width: 560px; margin: 0 auto; }
+  h1{
+    font-family:'Caveat', cursive;
+    font-size: 34px;
+    text-align:center;
+    color:#b5495f;
+    margin: 0 0 2px;
+  }
+  .sub{ text-align:center; font-size:13px; color:#c98aa0; margin-bottom:22px; }
+
+  .stats{ display:flex; gap:12px; margin-bottom: 22px; }
+  .stat{
+    flex:1; background:rgba(255,255,255,.75); border-radius:16px; padding:16px 10px;
+    text-align:center; box-shadow: 0 10px 25px rgba(210,150,170,.18);
+  }
+  .stat .num{ font-size: 28px; font-weight:700; }
+  .stat .lbl{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#a97d8a; margin-top:2px;}
+  .stat.yes .num{ color: var(--green); }
+  .stat.no .num{ color: var(--red); }
+  .stat.total .num{ color: var(--pink-deep); }
+
+  .refresh-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; font-size:12px; color:#b98a98;}
+  .dot{ width:8px; height:8px; border-radius:50%; background: var(--green); display:inline-block; margin-right:6px; animation: blink 1.6s infinite; }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+  .list{ background:rgba(255,255,255,.7); border-radius:18px; overflow:hidden; box-shadow: 0 10px 25px rgba(210,150,170,.15); }
+  .row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 13px 16px; border-bottom: 1px solid #f5e2ea;
+    animation: fadeIn .5s ease both;
+  }
+  .row:last-child{ border-bottom:none; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+  .row .name{ font-weight:600; font-size:15px; }
+  .row .time{ font-size:11px; color:#c0a0ab; margin-top:1px; }
+  .badge{
+    font-size:12px; font-weight:700; padding:4px 12px; border-radius:999px;
+  }
+  .badge.yes{ background:#e4f6ea; color:#3f9963; }
+  .badge.no{ background:#fbe8ea; color:#c05066; }
+
+  .empty{ text-align:center; padding: 40px 20px; color:#c9a4b2; font-family:'Caveat', cursive; font-size:20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Esther's Bachelorette 🌸</h1>
+  <div class="sub">private RSVP tracker · updates live</div>
+
+  <div class="stats">
+    <div class="stat total"><div class="num" id="totalNum">0</div><div class="lbl">Responses</div></div>
+    <div class="stat yes"><div class="num" id="yesNum">0</div><div class="lbl">Coming</div></div>
+    <div class="stat no"><div class="num" id="noNum">0</div><div class="lbl">Can't make it</div></div>
+  </div>
+
+  <div class="refresh-row">
+    <span><span class="dot"></span>live — refreshing every few seconds</span>
+    <span id="lastUpdated">—</span>
+  </div>
+
+  <div class="list" id="list">
+    <div class="empty">no responses yet... 🌷</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var listEl = document.getElementById('list');
+  var totalEl = document.getElementById('totalNum');
+  var yesEl = document.getElementById('yesNum');
+  var noEl = document.getElementById('noNum');
+  var lastUpdatedEl = document.getElementById('lastUpdated');
+
+  function fmtTime(iso){
+    try{
+      var d = new Date(iso);
+      return d.toLocaleString(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    }catch(e){ return ''; }
+  }
+
+  function render(data){
+    totalEl.textContent = data.length;
+    var yes = data.filter(function(d){ return d.status === 'yes'; }).length;
+    var no = data.filter(function(d){ return d.status === 'no'; }).length;
+    yesEl.textContent = yes;
+    noEl.textContent = no;
+
+    if(data.length === 0){
+      listEl.innerHTML = '<div class="empty">no responses yet... 🌷</div>';
+      return;
+    }
+
+    listEl.innerHTML = data.map(function(d){
+      var safeName = String(d.name).replace(/[&<>"']/g, function(c){
+        return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+      });
+      return '<div class="row">' +
+        '<div><div class="name">' + safeName + '</div><div class="time">' + fmtTime(d.time) + '</div></div>' +
+        '<div class="badge ' + d.status + '">' + (d.status === 'yes' ? "Yesss 💃" : "Naurr 🥲") + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function load(){
+    fetch('/.netlify/functions/rsvp')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        render(data);
+        lastUpdatedEl.textContent = 'updated ' + new Date().toLocaleTimeString();
+      })
+      .catch(function(){ lastUpdatedEl.textContent = 'connection hiccup, retrying...'; });
+  }
+
+  load();
+  setInterval(load, 4000);
+})();
+</script>
+</body>
+</html>

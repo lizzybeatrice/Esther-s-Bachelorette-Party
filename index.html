@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>You're Invited 🌸</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Caveat:wght@500;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink: #f7c6d9;
+    --pink-deep: #e88bab;
+    --yellow: #f7e2a4;
+    --yellow-deep: #eec868;
+    --cream: #fffaf3;
+    --ink: #6b4a52;
+  }
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{
+    margin:0; padding:0; min-height:100%;
+    background: linear-gradient(160deg, #fff6ef 0%, #ffeef5 45%, #fff9ec 100%);
+    font-family: 'Quicksand', sans-serif;
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+  body{
+    min-height: 100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position: relative;
+  }
+
+  /* ---------- floating flowers ---------- */
+  .flowers{ position: fixed; inset:0; pointer-events:none; z-index: 1; overflow:hidden; }
+  .flower{
+    position:absolute; font-size: 28px; opacity:.85; filter: drop-shadow(0 2px 3px rgba(0,0,0,.06));
+    animation: float 6s ease-in-out infinite;
+  }
+  @keyframes float{
+    0%,100%{ transform: translateY(0) rotate(var(--r,0deg)); }
+    50%{ transform: translateY(-16px) rotate(calc(var(--r,0deg) + 6deg)); }
+  }
+
+  /* ---------- screens ---------- */
+  .screen{
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    display:none;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding: 32px 24px 60px;
+  }
+  .screen.active{ display:flex; }
+  .fade-in{ animation: fadeIn 1s ease both; }
+  @keyframes fadeIn{ from{opacity:0; transform: translateY(14px);} to{opacity:1; transform:none;} }
+
+  /* ---------- envelope ---------- */
+  #screen-envelope{ cursor: pointer; }
+  .envelope-wrap{ perspective: 1400px; }
+  .envelope{
+    position: relative;
+    width: min(78vw, 300px);
+    height: min(58vw, 220px);
+    margin: 0 auto;
+  }
+  .env-back{
+    position:absolute; inset:0;
+    background: #fffdfa;
+    border-radius: 8px;
+    box-shadow: 0 18px 40px rgba(220,150,170,.28), inset 0 0 0 1px #f3dbe4;
+    background-image:
+      radial-gradient(circle at 6px 6px, transparent 3px, transparent 3px),
+      repeating-linear-gradient(45deg, rgba(232,139,171,.10) 0 2px, transparent 2px 10px);
+    border: 1.5px dashed #f0c3d6;
+  }
+  .env-pocket{
+    position:absolute; left:0; right:0; bottom:0; height: 62%;
+    background: #fffefc;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    border-radius: 0 0 8px 8px;
+    z-index:3;
+    box-shadow: inset 0 1px 0 rgba(0,0,0,.02);
+  }
+  .env-pocket::before{
+    content:"";
+    position:absolute; left:0; right:0; top:0; bottom:0;
+    background: linear-gradient(160deg, #fff 0%, #fff 100%);
+    clip-path: polygon(0 0, 50% 62%, 100% 0, 100% 100%, 0 100%);
+    border-top: 1.5px solid #f6d3e1;
+  }
+  .letter{
+    position:absolute; left:6%; right:6%; top:10%; height: 84%;
+    background: var(--cream);
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08), inset 0 0 0 1px #f3e4d2;
+    z-index:2;
+    transition: transform 1.1s cubic-bezier(.2,.8,.2,1), opacity .6s ease .2s;
+    display:flex; align-items:center; justify-content:center;
+    padding: 10px;
+  }
+  .letter span{ font-family:'Caveat', cursive; font-size: 15px; color:#c68aa0; opacity:.8; }
+  .letter.out{ transform: translateY(-128%) scale(1.02); }
+  .flap{
+    position:absolute; left:0; right:0; top:0; height: 62%;
+    background: linear-gradient(160deg, #ffffff 0%, #fef7fa 100%);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transition: transform 1s cubic-bezier(.3,.7,.3,1);
+    z-index: 4;
+    border-bottom: 1.5px solid #f3d3e0;
+  }
+  .flap.open{ transform: rotateX(-178deg); z-index: 1; }
+  .seal{
+    position:absolute; left:50%; top: 58%; transform: translate(-50%,-50%);
+    width: 44px; height:44px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--pink-deep), #d76f95 70%);
+    box-shadow: 0 3px 8px rgba(190,90,120,.4);
+    z-index: 5;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 18px; color:#fff5f8;
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .seal.hide{ opacity:0; transform: translate(-50%,-50%) scale(.4); }
+  .tap-hint{
+    margin-top: 26px; font-family:'Caveat', cursive; font-size: 22px; color: var(--pink-deep);
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:.55;} 50%{opacity:1;} }
+
+  /* ---------- reveal ---------- */
+  .eyebrow{ font-family:'Caveat', cursive; font-size: clamp(22px,6vw,28px); color: var(--pink-deep); margin: 0 0 6px; }
+  .title-script{
+    font-family:'Great Vibes', cursive;
+    font-size: clamp(40px, 12vw, 64px);
+    line-height: 1.15;
+    color: #b5495f;
+    margin: 0 0 8px;
+    text-shadow: 0 2px 0 rgba(255,255,255,.6);
+  }
+  .subtitle{ font-family:'Caveat', cursive; font-size: clamp(18px,5vw,22px); color:var(--ink); opacity:.85; margin-bottom: 22px;}
+
+  .btn{
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size: 16px;
+    letter-spacing:.02em;
+    border:none;
+    border-radius: 999px;
+    padding: 14px 30px;
+    cursor:pointer;
+    color:#fff;
+    background: linear-gradient(135deg, var(--pink-deep), #d9698f);
+    box-shadow: 0 10px 22px rgba(216,110,145,.35);
+    transition: transform .15s ease, box-shadow .15s ease;
+    margin-top: 6px;
+  }
+  .btn:active{ transform: translateY(2px) scale(.98); box-shadow: 0 6px 14px rgba(216,110,145,.3); }
+  .btn.secondary{
+    background: linear-gradient(135deg, #fff, #fff);
+    color: var(--pink-deep);
+    box-shadow: inset 0 0 0 2px var(--pink-deep);
+  }
+  .btn.yellow{ background: linear-gradient(135deg, var(--yellow-deep), #e3b94a); box-shadow: 0 10px 22px rgba(230,190,90,.35); color:#6b4a1c;}
+
+  /* ---------- details card ---------- */
+  .card{
+    background: rgba(255,255,255,.72);
+    backdrop-filter: blur(6px);
+    border: 1px solid #ffffffa8;
+    border-radius: 22px;
+    padding: 26px 22px;
+    box-shadow: 0 20px 45px rgba(210,150,170,.22);
+    width:100%;
+  }
+  .detail-row{
+    display:flex; align-items:flex-start; gap:12px;
+    text-align:left; padding: 10px 4px; border-bottom: 1px dashed #f0d3de;
+  }
+  .detail-row:last-child{ border-bottom:none; }
+  .detail-row .ico{ font-size: 20px; margin-top:1px; }
+  .detail-row .label{ font-size: 12px; text-transform:uppercase; letter-spacing:.08em; color:#c98aa0; font-weight:700; }
+  .detail-row .value{ font-family:'Caveat', cursive; font-size: 21px; color: var(--ink); line-height:1.15; }
+
+  .attire-swatches{ display:flex; gap:8px; margin-top:4px; }
+  .swatch{ width:18px; height:18px; border-radius:50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.06); }
+
+  .rsvp-actions{ display:flex; flex-direction:column; gap:12px; margin-top: 26px; width:100%; }
+
+  /* ---------- name capture ---------- */
+  .name-input{
+    width:100%;
+    font-family:'Quicksand', sans-serif;
+    font-size: 17px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 2px solid #f0c3d6;
+    background:#fffefc;
+    outline:none;
+    text-align:center;
+    margin-bottom: 16px;
+  }
+  .name-input:focus{ border-color: var(--pink-deep); }
+
+  .big-emoji{ font-size: 52px; margin-bottom: 6px; }
+
+  footer.sign{
+    margin-top: 30px; font-family:'Caveat', cursive; font-size: 19px; color:#c68aa0;
+  }
+  .note{ font-size: 12px; color:#c9a4b2; margin-top:4px; font-family:'Quicksand'; }
+
+  .hint-error{ color:#c0435f; font-size:13px; margin-top:-8px; margin-bottom:10px; font-family:'Quicksand'; display:none; }
+</style>
+</head>
+<body>
+
+<div class="flowers" id="flowers"></div>
+
+<!-- SCREEN 1 : ENVELOPE -->
+<div class="screen active" id="screen-envelope">
+  <div class="envelope-wrap" id="envelopeWrap">
+    <div class="envelope" id="envelope">
+      <div class="env-back"></div>
+      <div class="letter" id="letter"><span>with love, for you 🤍</span></div>
+      <div class="env-pocket"></div>
+      <div class="flap" id="flap"></div>
+      <div class="seal" id="seal">🌸</div>
+    </div>
+  </div>
+  <p class="tap-hint">tap the envelope to open ✨</p>
+</div>
+
+<!-- SCREEN 2 : REVEAL -->
+<div class="screen" id="screen-reveal">
+  <div class="fade-in">
+    <p class="eyebrow">You are specially invited to</p>
+    <h1 class="title-script">Esther's<br>Bachelorette&nbsp;Party</h1>
+    <p class="subtitle">yes, YOU. no substitutes accepted 💌</p>
+    <button class="btn" id="toDetailsBtn">Open the Details</button>
+  </div>
+</div>
+
+<!-- SCREEN 3 : DETAILS -->
+<div class="screen" id="screen-details">
+  <div class="card fade-in">
+    <p class="eyebrow" style="margin-top:0;">the details, bestie</p>
+    <div class="detail-row">
+      <div class="ico">📅</div>
+      <div><div class="label">Date</div><div class="value">Sunday, 18 October</div></div>
+    </div>
+    <div class="detail-row">
+      <div class="ico">⏰</div>
+      <div><div class="label">Time</div><div class="value">1.30pm – 5.00pm</div></div>
+    </div>
+    <div class="detail-row">
+      <div class="ico">📍</div>
+      <div><div class="label">Venue</div><div class="value">Choux Choux, Penang</div></div>
+    </div>
+    <div class="detail-row">
+      <div class="ico">🎀</div>
+      <div>
+        <div class="label">Attire</div>
+        <div class="value">All shades of pink &amp; yellow</div>
+        <div class="attire-swatches">
+          <span class="swatch" style="background:#f7c6d9"></span>
+          <span class="swatch" style="background:#e88bab"></span>
+          <span class="swatch" style="background:#ffd9e6"></span>
+          <span class="swatch" style="background:#f7e2a4"></span>
+          <span class="swatch" style="background:#eec868"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="rsvp-actions">
+    <button class="btn" id="yesBtn">Yesss, I'm coming! 💃</button>
+    <button class="btn secondary" id="noBtn">Naurr, I can't make it 🥲</button>
+  </div>
+</div>
+
+<!-- SCREEN 4 : NAME CAPTURE -->
+<div class="screen" id="screen-name">
+  <div class="card fade-in">
+    <p class="eyebrow" style="margin-top:0;" id="namePrompt">so we can note it down —</p>
+    <input class="name-input" id="nameInput" placeholder="type your name here" maxlength="60" autocomplete="off">
+    <p class="hint-error" id="nameError">oops, please pop your name in first!</p>
+    <button class="btn" id="submitBtn">Confirm</button>
+  </div>
+</div>
+
+<!-- SCREEN 5 : THANK YOU -->
+<div class="screen" id="screen-thanks">
+  <div class="fade-in">
+    <div class="big-emoji" id="thanksEmoji">🎉</div>
+    <p class="eyebrow" id="thanksTitle">yayyy!</p>
+    <h1 class="title-script" style="font-size: clamp(30px,9vw,44px);" id="thanksMsg">can't wait to<br>celebrate with you</h1>
+    <p class="subtitle" id="thanksSub">18 Oct · Choux Choux, Penang · wear your prettiest pink &amp; yellow 🌸</p>
+    <footer class="sign">
+      with love, "The Bride's Favs" 🌷<br>
+      <span class="note">(just kidding, y'all her favs too)</span>
+    </footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- decorative flowers ----------
+  var emojis = ['🌸','🌼','🌷','💮','🌺'];
+  var pinkYellow = ['🌸','🌸','🌼','🌷','🌼','💮'];
+  var container = document.getElementById('flowers');
+  var positions = [
+    [3,4],[8,88],[85,6],[92,80],[4,42],[90,45],[15,94],[70,92],
+    [2,68],[95,18],[48,3],[55,96],[25,8],[78,60],[12,20]
+  ];
+  positions.forEach(function(pos, i){
+    var el = document.createElement('div');
+    el.className = 'flower';
+    el.textContent = pinkYellow[i % pinkYellow.length];
+    el.style.left = pos[1] + 'vw';
+    el.style.top = pos[0] + 'vh';
+    el.style.setProperty('--r', (Math.random()*20-10) + 'deg');
+    el.style.animationDelay = (Math.random()*4) + 's';
+    el.style.fontSize = (20 + Math.random()*18) + 'px';
+    container.appendChild(el);
+  });
+
+  // ---------- screen nav ----------
+  function show(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  // ---------- envelope open ----------
+  var opened = false;
+  document.getElementById('screen-envelope').addEventListener('click', function(){
+    if(opened) return;
+    opened = true;
+    document.getElementById('flap').classList.add('open');
+    document.getElementById('seal').classList.add('hide');
+    setTimeout(function(){
+      document.getElementById('letter').classList.add('out');
+    }, 420);
+    setTimeout(function(){
+      show('screen-reveal');
+    }, 1500);
+  });
+
+  document.getElementById('toDetailsBtn').addEventListener('click', function(){
+    show('screen-details');
+  });
+
+  var chosenStatus = null; // 'yes' | 'no'
+
+  document.getElementById('yesBtn').addEventListener('click', function(){
+    chosenStatus = 'yes';
+    document.getElementById('namePrompt').textContent = "yay! what's your name, love?";
+    show('screen-name');
+    document.getElementById('nameInput').focus();
+  });
+  document.getElementById('noBtn').addEventListener('click', function(){
+    chosenStatus = 'no';
+    document.getElementById('namePrompt').textContent = "aw, we'll miss you — what's your name?";
+    show('screen-name');
+    document.getElementById('nameInput').focus();
+  });
+
+  document.getElementById('submitBtn').addEventListener('click', submitRSVP);
+  document.getElementById('nameInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') submitRSVP();
+  });
+
+  function submitRSVP(){
+    var name = document.getElementById('nameInput').value.trim();
+    var errorEl = document.getElementById('nameError');
+    if(!name){
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+    var btn = document.getElementById('submitBtn');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    fetch('/.netlify/functions/rsvp', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name: name, status: chosenStatus })
+    })
+    .then(function(){ finishRSVP(name); })
+    .catch(function(){ finishRSVP(name); }) // even if it fails, still show thank-you
+    .finally(function(){
+      btn.textContent = 'Confirm';
+      btn.disabled = false;
+    });
+  }
+
+  function finishRSVP(name){
+    if(chosenStatus === 'yes'){
+      document.getElementById('thanksEmoji').textContent = '🎉';
+      document.getElementById('thanksTitle').textContent = 'yayyy, ' + name + '!';
+      document.getElementById('thanksMsg').innerHTML = "can't wait to<br>celebrate with you";
+      document.getElementById('thanksSub').textContent = "18 Oct · Choux Choux, Penang · wear your prettiest pink & yellow 🌸";
+    } else {
+      document.getElementById('thanksEmoji').textContent = '🥲';
+      document.getElementById('thanksTitle').textContent = 'we\'ll miss you, ' + name;
+      document.getElementById('thanksMsg').innerHTML = "you'll be missed<br>on the big day";
+      document.getElementById('thanksSub').textContent = "thank you for letting us know 💛";
+    }
+    show('screen-thanks');
+  }
+})();
+</script>
+</body>
+</html>
