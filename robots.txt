@@ -1,2 +1,2 @@
 User-agent: *
-Disallow: /rsvp-u1hoby4a1e8.html
+Allow: /
